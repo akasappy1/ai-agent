@@ -1,20 +1,26 @@
 import os
-import pathlib
 
 def get_files_info(working_directory, directory="."):
-    full_path = os.path.abspath(directory)
-    full_working = os.path.abspath(working_directory)
-    if not full_path.startswith(full_working):
-        raise Exception(f'Error: Cannot list "{directory}" as it is outside the permitted working directory')
-    if not os.path.isdir(directory):
-        raise Exception(f'Error: "{directory}" is not a directory')
-    contents = os.listdir(directory)
-    file_list = ""
-    for item in contents:
-        filename = os.path.basename(item)
-        file_size = os.path.getsize(item)
-        file_is_directory = os.path.isdir(item)
-        file_info = f"- {filename}: file_size={file_size} is_dir={file_is_directory}"
-        file_list += file_info + "\n"
-    return file_list
-    
+    full_path = os.path.join(working_directory, directory)
+    if not os.path.abspath(full_path).startswith(os.path.abspath(working_directory)):
+        return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
+    try:
+        if not os.path.isdir(full_path):
+            return f'Error: "{directory}" is not a directory'
+        contents = sorted(os.listdir(full_path))
+        file_list = ""
+        for item in contents:
+            entry_path = os.path.join(full_path, item)
+            file_size = os.path.getsize(entry_path)
+            file_is_directory = os.path.isdir(entry_path)
+            file_info = f"- {item}: file_size={file_size} bytes, is_dir={file_is_directory}"
+            file_list += file_info + "\n"
+        if directory == ".":
+            dir_name = "current" 
+        else:
+            dir_name = directory
+        pretty_return = f"Result for {dir_name} directory:\n{file_list}"
+        return pretty_return
+    except Exception as e:
+        return f"Error: {e}"
+
